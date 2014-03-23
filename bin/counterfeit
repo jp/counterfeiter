@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require 'counterfeiter'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: counterfeit [options] [directory]"
+
+  opts.on('-h', '--redis-host REDIS_HOST', 'Redis host') { |v| options[:redis_host] = v }
+  opts.on('-p', '--redis-port REDIS_PORT', 'Redis port') { |v| options[:redis_port] = v }
+  opts.on('-U', '--upload') { |v| options[:upload] = true }
+  opts.on('-D', '--download') { |v| options[:download] = true }
+end.parse!
+
+options[:directory] = ARGV
+
+if options[:upload] && options[:download]
+  puts "Can't have upload and download options at the same time"
+  exit
+end
+
+
+Counterfeiter.config_redis options[:redis_host], options[:redis_port]
+
+if options[:upload]
+  Counterfeiter.upload_new_files options[:directory]
+end
+
+if options[:download]
+  Counterfeiter.download_new_files
+end  
