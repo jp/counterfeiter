@@ -6,10 +6,10 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: counterfeit [options] [directory]"
 
-  opts.on('-h', '--redis-host REDIS_HOST', 'Redis host') { |v| options[:redis_host] = v }
-  opts.on('-p', '--redis-port REDIS_PORT', 'Redis port') { |v| options[:redis_port] = v }
-  opts.on('-U', '--upload') { |v| options[:upload] = true }
-  opts.on('-D', '--download') { |v| options[:download] = true }
+  opts.on('-h', '--redis-host REDIS_HOST', 'Redis host. Default to "127.0.0.1".') { |v| options[:redis_host] = v }
+  opts.on('-p', '--redis-port REDIS_PORT', 'Redis port. Default to "6379".') { |v| options[:redis_port] = v }
+  opts.on('-U', '--upload', 'Upload files to redis.') { |v| options[:upload] = true }
+  opts.on('-D', '--download', 'Download files from redis.') { |v| options[:download] = true }
 end.parse!
 
 options[:directory] = ARGV
@@ -19,7 +19,6 @@ if options[:upload] && options[:download]
   exit
 end
 
-
 Counterfeiter.config_redis options[:redis_host], options[:redis_port]
 
 if options[:upload]
@@ -27,5 +26,5 @@ if options[:upload]
 end
 
 if options[:download]
-  Counterfeiter.download_new_files
+  Counterfeiter.download_new_files options[:directory]
 end  

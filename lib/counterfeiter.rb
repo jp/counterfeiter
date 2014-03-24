@@ -1,4 +1,5 @@
 require 'redis'
+require 'fileutils'
 
 class Counterfeiter
   @redis_key='Counterfeiter'
@@ -19,10 +20,12 @@ class Counterfeiter
     @redis.zadd @redis_key, time, {path:file, body: File.read(file)}
   end
 
-  def self.download_new_files last_update = Time.at(0)
+  def self.download_new_files target_dir = '.', last_update = Time.at(0)
     files = @redis.zrangebyscore(@redis_key, last_update.to_i, Time.now.utc.to_i)
     files.each do |f|
-      puts eval(f)[:path]
+      path = File.join(target_dir,eval(f)[:path])
+      FileUtils.mkdir_p File.dirname(path)
+      File.open(File.realdirpath(path), 'w') { |file| file.write(eval(f)[:body]) }
     end
   end
 end
