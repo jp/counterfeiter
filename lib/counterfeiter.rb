@@ -1,8 +1,10 @@
 require 'redis'
 require 'fileutils'
+require 'socket'
 
 class Counterfeiter
   @redis_key='Counterfeiter'
+  @hostname = Socket.gethostbyname(Socket.gethostname).first
 
   def self.upload_new_files target_dir, last_update = Time.at(0)
     Dir.glob(File.join(target_dir,'**/*')).each do |f|
@@ -10,6 +12,7 @@ class Counterfeiter
         upload_file_to_redis(f,File.mtime(f).to_i)
       end
     end
+    @redis.hset @redis_key, "#{@hostname}_last_upload", Time.now.to_i
   end
 
   def self.config_redis host = "127.0.0.1", port = 6379
